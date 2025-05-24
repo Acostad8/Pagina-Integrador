@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroSense - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hydro: {
+                            primary: '#0ea5e9',
+                            dark: '#0369a1',
+                            light: '#bae6fd',
+                            accent: '#22d3ee',
+                            background: '#f0f9ff'
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar {
+            transition: all 0.5s ease;
+            width: 250px;
+        }
+
+        .sidebar-collapsed {
+            width: 70px;
+            overflow: hidden;
+        }
+
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .building-info {
+            display: none;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-row:hover {
+            background-color: #f8fafc;
+        }
+
+        .toggle-btn {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn.collapsed {
+            transform: rotate(180deg);
+        }
+
+        /* Estilos para el hover del sidebar */
+        .sidebar-collapsed:hover {
+            width: 250px;
+            z-index: 50;
+        }
+
+        .sidebar-collapsed:hover .sidebar-text {
+            display: inline;
+        }
+
+        .sidebar-collapsed:hover .logo-text {
+            display: inline;
+        }
+
+        .sidebar-collapsed:hover .building-info {
+            display: block;
+        }
+
+        /* Estilos para la nueva gráfica */
+        .grafica-container {
+            margin-top: 20px;
+        }
+
+        .grafica {
+            display: flex;
+            height: 200px;
+            align-items: flex-end;
+            gap: 8px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .barra {
+            flex: 1;
+            background: #0ea5e9;
+            position: relative;
+            min-width: 20px;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s ease, background 0.3s ease;
+        }
+
+        .barra:hover {
+            background: #0369a1;
+        }
+
+        .barra::after {
+            content: attr(data-mes);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .eje-y {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 30px;
+            width: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-right: 5px;
+            text-align: right;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar bg-hydro-dark/90 text-white p-4 hidden md:flex flex-col sidebar-collapsed">
+            <div class="flex items-center justify-between mb-8">
+                <a href="/index.html">
+
+                    <div class="flex items-center">
+                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold logo-text">HydroSense</span>
+                    </div>
+                </a>
+                <button id="toggleSidebar" class="toggle-btn text-gray-300 hover:text-white">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+
+            </div>
+
+            <nav class="flex-1">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-chart-bar mr-3"></i>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/dashBoard2.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-users mr-3"></i>
+                            <span class="sidebar-text">Usuarios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-file-invoice-dollar mr-3"></i>
+                            <span class="sidebar-text">Facturación</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-cog mr-3"></i>
+                            <span class="sidebar-text">Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-hydro-primary/30">
+                <a href="/index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    <span class="sidebar-text">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white shadow p-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center md:hidden">
+                        <button id="mobileMenuButton" class="mr-4 text-gray-500">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
+                    <div class="flex items-center">
+                        <div class="relative">
+                            <input type="text" placeholder="Buscar..."
+                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <button class="ml-4 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="ml-4 flex items-center">
+                            <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center">
+                                <span class="text-hydro-primary font-bold">AD</span>
+                            </div>
+                            <span class="ml-2 text-sm font-medium hidden md:inline">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Dashboard -->
+            <main class="p-6">
+                <!-- Cards Section -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <!-- Card 1: Promedio Diario -->
+                    <div class="card bg-white p-6 rounded-lg shadow ">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Promedio Diario</h3>
+                            <p class="text-2xl font-bold text-hydro-primary">250 L</p>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500 ">
+                            <p>Por día</p>
+                            <div class="flex items-center text-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-arrow-down-right mr-1 h-4 w-4">
+                                    <path d="M17 7v10H7"></path>
+                                    <path d="m7 7 10 10"></path>
+                                </svg>
+                                <span>6.5%</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Card 2: Consumo Total -->
+                    <div class="card bg-white p-6 rounded-lg shadow">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Consumo Total</h3>
+                            <p class="text-2xl font-bold text-hydro-accent">12,540 L</p>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500 ">
+                            <p class="text-sm text-gray-500">
+                                Último mes
+                            </p>
+                            <div class="flex items-center text-red-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-arrow-up-right mr-1 h-4 w-4">
+                                    <path d="M7 7h10v10"></path>
+                                    <path d="M7 17 17 7"></path>
+                                </svg>
+                                <span>12.5% </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Pago Total -->
+                    <div class="card bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Costo Estimado</h3>
+                        <p class="text-2xl font-bold text-hydro-dark">3,250 Bs</p>
+
+                        <div class="flex justify-between text-sm text-gray-500 ">
+                            <p class="text-sm text-gray-500">Ultimo mes</p>
+                            <div class="flex items-center text-red-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-arrow-up-right mr-1 h-4 w-4">
+                                    <path d="M7 7h10v10"></path>
+                                    <path d="M7 17 17 7"></path>
+                                </svg>
+                                <span>8.5% </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Alertas Activas -->
+                    <div class="card bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Alertas Activas</h3>
+                        <div class="flex items-center">
+                            <p class="text-2xl font-bold text-red-600 mr-2">3</p>
+                            <p class="text-sm text-gray-500">Requieren atención</p>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Total usuarios: 7</p>
+                    </div>
+                </div>
+
+
+
+                <!-- Charts and Tenants Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Consumption Chart -->
+                    <div class="card bg-white p-6 rounded-lg shadow lg:col-span-2">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Consumo Histórico</h3>
+                        <p class="text-sm text-gray-500 mb-4">Mostrando el consumo de agua y el montoen el último año.
+                        </p>
+                        <div class="flex mb-4">
+                            <div class="mr-6">
+                                <p class="text-sm text-gray-500">Litros</p>
+                                <p class="text-xl font-bold">3.004</p>
+                            </div>
+                            <div class="mr-6">
+                                <p class="text-sm text-gray-500">Monto</p>
+                                <p class="text-xl font-bold">2.950 Bs</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Usuarios</p>
+                                <p class="text-sm text-red-500">Hay 3 sin haber pagado el mes anterior.</p>
+                            </div>
+                        </div>
+
+                        <!-- Nueva gráfica de barras -->
+                        <div class="grafica-container relative">
+                            <div class="eje-y">
+                                <span>600</span>
+                                <span>450</span>
+                                <span>300</span>
+                                <span>150</span>
+                                <span>0</span>
+                            </div>
+                            <div class="grafica pl-8">
+                                <div class="barra" style="height: 50%;" data-mes="may"></div>
+                                <div class="barra" style="height: 60%;" data-mes="jun"></div>
+                                <div class="barra" style="height: 45%;" data-mes="jul"></div>
+                                <div class="barra" style="height: 70%;" data-mes="ago"></div>
+                                <div class="barra" style="height: 85%;" data-mes="sept"></div>
+                                <div class="barra" style="height: 50%;" data-mes="oct"></div>
+                                <div class="barra" style="height: 65%;" data-mes="nov"></div>
+                                <div class="barra" style="height: 75%;" data-mes="dic"></div>
+                                <div class="barra" style="height: 90%;" data-mes="ene"></div>
+                                <div class="barra" style="height: 55%;" data-mes="feb"></div>
+                                <div class="barra" style="height: 40%;" data-mes="mar"></div>
+                                <div class="barra" style="height: 30%;" data-mes="abr"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tenants Status -->
+                    <div class="card bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Usuarios Registrados
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-red-600 font-bold">JP</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Juan Acosta</p>
+                                    <p class="text-sm text-gray-500">Dpto 101</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-red-600 font-bold">ML</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Marian Álvarez</p>
+                                    <p class="text-sm text-gray-500">Dpto 102</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-red-600 font-bold">RG</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Andres Ramirez</p>
+                                    <p class="text-sm text-gray-500">Dpto 103</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- Tenants Table -->
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Consumption Chart
+        const ctx = document.getElementById('consumptionChart').getContext('2d');
+        const consumptionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr'],
+                datasets: [
+                    {
+                        label: 'Consumo de agua (L)',
+                        data: [300, 350, 400, 450, 420, 380, 350, 320, 300, 310, 330, 350],
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Monto pagado (Bs)',
+                        data: [250, 300, 350, 400, 380, 350, 320, 300, 280, 290, 310, 330],
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Toggle sidebar
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-collapsed');
+            toggleSidebar.classList.toggle('collapsed');
+        });
+
+        mobileMenuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 768 && !sidebar.contains(e.target) && e.target !== mobileMenuButton) {
+                sidebar.classList.add('hidden');
+            }
+        });
+
+        // Ocultar sidebar automáticamente después de 5 segundos
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar');
+
+            setTimeout(() => {
+                sidebar.classList.add('sidebar-collapsed');
+            }, 1000); // 5 segundos
+        });
+    </script>
+</body>
+
+</html>

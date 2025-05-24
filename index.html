@@ -30,6 +30,15 @@
         }
     </script>
 </head>
+<style>
+    body {
+        overflow: auto;
+    }
+
+    body::-webkit-scrollbar {
+    display: none; /* Oculta la barra */
+    }
+</style>
 
 <body class="bg-hydro-background font-sans">
     <!-- Barra de navegación -->
@@ -47,16 +56,17 @@
                     </div>
                 </a>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="/" class="text-hydro-dark hover:text-hydro-primary font-medium">Inicio</a>
-                    <a href="/Funcionalidades"
+                    <a href="index.html" class="text-hydro-dark hover:text-hydro-primary font-medium">Inicio</a>
+                    <a href="Funcionalidades/index.html"
                         class="text-gray-500 hover:text-hydro-primary font-medium">Funcionalidades</a>
-                    <a href="/Contacto" class="text-gray-500 hover:text-hydro-primary font-medium">Contacto</a>
+                    <a href="Contacto/index.html" class="text-gray-500 hover:text-hydro-primary font-medium">Contacto</a>
                     <div class="flex space-x-4">
-                        <a href="/Login/login.html"
-                            class="px-4 py-2 text-hydro-primary font-medium hover:bg-hydro-light rounded-lg transition">Iniciar
-                            sesión</a>
-                        <a href="/login/register.html"
-                            class="px-4 py-2 bg-hydro-primary text-white font-medium hover:bg-hydro-dark rounded-lg transition">Registrarse</a>
+                        <a href="Login/login.html"
+                            class="px-4 py-2 text-hydro-primary font-medium hover:bg-hydro-light rounded-lg transition">Iniciar sesión
+                        </a>
+                        <a href="Login/register.html"
+                            class="px-4 py-2 bg-hydro-primary text-white font-medium hover:bg-hydro-dark rounded-lg transition">Registrarse
+                        </a>
                     </div>
                 </div>
             </div>
@@ -76,7 +86,7 @@
                         <a href="#"
                             class="px-6 py-3 bg-hydro-primary text-white font-medium rounded-lg hover:bg-hydro-dark transition text-center shadow-md">Comenzar
                             ahora</a>
-                        <a href="/Demostracion/index.html"
+                        <a href="Demostracion/index.html"
                             class="px-6 py-3 border border-hydro-primary text-hydro-primary font-medium rounded-lg hover:bg-hydro-light transition text-center">Ver
                             demostración</a>
                     </div>

@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HydroSense - Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="../Public/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="Public/favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -110,7 +112,7 @@
         <!-- Sidebar -->
         <div class="sidebar bg-hydro-dark text-white p-4 hidden md:flex flex-col sidebar-collapsed">
             <div class="flex items-center justify-between mb-8">
-                <a href="index.html">
+                <a href="../index.html">
 
                     <div class="flex items-center">
                         <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
@@ -126,13 +128,13 @@
             <nav class="flex-1">
                 <ul class="space-y-2">
                     <li>
-                        <a href="dashBoard4.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
-                            <i class="fas fa-tachometer-alt mr-3"></i>
-                            <span class="sidebar-text">Dashboard</span>
+                        <a href="../Dashboar/monitoreo.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-chart-bar mr-3"></i>
+                            <span class="sidebar-text">Panel de Monitoreo</span>
                         </a>
                     </li>
                     <li>
-                        <a href="dashBoard2.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30  bg-hydro-primary">
+                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30  bg-hydro-primary">
                             <i class="fas fa-users mr-3"></i>
                             <span class="sidebar-text">Usuarios</span>
                         </a>
@@ -153,9 +155,9 @@
             </nav>
 
             <div class="mt-auto pt-4 border-t border-hydro-primary/30">
-                <a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                <a href="../index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
                     <i class="fas fa-sign-out-alt mr-3"></i>
-                    <span class="sidebar-text">Logout</span>
+                    <span class="sidebar-text">Salir</span>
                 </a>
             </div>
         </div>
@@ -175,16 +177,16 @@
                                 d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Panel de Monitoreo</h2>
                     <div class="flex items-center">
                         <div class="relative">
-                            <input type="text" placeholder="Buscar..."
+                            <input type="text" placeholder="Buscar usuario..."
                                 class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-                        <button class="ml-4 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <!-- <button class="ml-4 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
                             <i class="fas fa-bell"></i>
-                        </button>
+                        </button> -->
                         <div class="ml-4 flex items-center">
                             <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center">
                                 <span class="text-hydro-primary font-bold">AD</span>
@@ -321,7 +323,7 @@
                                         a
                                         <span class="font-medium">3</span>
                                         de
-                                        <span class="font-medium">7</span>
+                                        <span class="font-medium">3</span>
                                         resultados
                                     </p>
                                 </div>

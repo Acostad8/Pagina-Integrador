@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroSense - Dashboard</title>
+    <title>HydroSense - Monitoreo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="../Public/favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -39,6 +40,7 @@
         .sidebar {
             transition: all 0.5s ease;
             width: 250px;
+            z-index: 40;
         }
 
         .sidebar-collapsed {
@@ -148,16 +150,55 @@
             font-size: 12px;
             color: #64748b;
         }
+
+        /* Estilos para móvil */
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                height: 100vh;
+                top: 0;
+                z-index: 50;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50">
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="sidebar bg-hydro-dark/90 text-white p-4 hidden md:flex flex-col sidebar-collapsed">
+        <div class="sidebar bg-hydro-dark text-white p-4 flex flex-col sidebar-collapsed" id="sidebar">
             <div class="flex items-center justify-between mb-8">
                 <a href="index.html">
-
                     <div class="flex items-center">
                         <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -167,22 +208,17 @@
                         <span class="ml-2 text-xl font-bold logo-text">HydroSense</span>
                     </div>
                 </a>
-                <!-- <button id="toggleSidebar" class="toggle-btn text-gray-300 hover:text-white">
-                    <i class="fas fa-chevron-left"></i>
-                </button> -->
-
             </div>
-
-            <nav class="flex-1">
+            <nav class="flex-1 ">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" class="flex items-center p-3 rounded-lg  bg-hydro-primary">
+                        <a href="#" class="flex items-center p-3 rounded-lg bg-hydro-primary">
                             <i class="fas fa-chart-bar mr-3"></i>
-                            <span class="sidebar-text">Dashboard</span>
+                            <span class="sidebar-text">Panel de Monitoreo</span>
                         </a>
                     </li>
                     <li>
-                        <a href="dashBoard2.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                        <a href="../Dashboar/usuarios.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
                             <i class="fas fa-users mr-3"></i>
                             <span class="sidebar-text">Usuarios</span>
                         </a>
@@ -205,15 +241,15 @@
             <div class="mt-auto pt-4 border-t border-hydro-primary/30">
                 <a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
                     <i class="fas fa-sign-out-alt mr-3"></i>
-                    <span class="sidebar-text">Logout</span>
+                    <span class="sidebar-text">Salir</span>
                 </a>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
+        <div class="flex-1 overflow-auto" id="mainContent">
             <!-- Header -->
-            <header class="bg-white shadow p-4">
+            <header class="bg-white shadow p-4 rounded-3x">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center md:hidden">
                         <button id="mobileMenuButton" class="mr-4 text-gray-500">
@@ -225,16 +261,13 @@
                                 d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Panel de Monitoreo</h2>
                     <div class="flex items-center">
                         <div class="relative">
                             <input type="text" placeholder="Buscar..."
                                 class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-                        <button class="ml-4 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
-                            <i class="fas fa-bell"></i>
-                        </button>
                         <div class="ml-4 flex items-center">
                             <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center">
                                 <span class="text-hydro-primary font-bold">AD</span>
@@ -248,7 +281,7 @@
             <!-- Main Dashboard -->
             <main class="p-6">
                 <!-- Cards Section -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <!-- Card 1: Promedio Diario -->
                     <div class="card bg-white p-6 rounded-lg shadow ">
                         <div>
@@ -267,14 +300,13 @@
                                 <span>6.5%</span>
                             </div>
                         </div>
-
                     </div>
 
                     <!-- Card 2: Consumo Total -->
                     <div class="card bg-white p-6 rounded-lg shadow">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-700 mb-2">Consumo Total</h3>
-                            <p class="text-2xl font-bold text-hydro-accent">12,540 L</p>
+                            <p class="text-2xl font-bold text-hydro-accent">16,340 L</p>
                         </div>
                         <div class="flex justify-between items-center text-sm text-gray-500 ">
                             <p class="text-sm text-gray-500">
@@ -289,14 +321,13 @@
                                 </svg>
                                 <span>12.5% </span>
                             </div>
-
                         </div>
                     </div>
 
                     <!-- Card 3: Pago Total -->
                     <div class="card bg-white p-6 rounded-lg shadow">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Costo Estimado</h3>
-                        <p class="text-2xl font-bold text-hydro-dark">3,250 Bs</p>
+                        <p class="text-2xl font-bold text-hydro-dark">61,380 Bs</p>
 
                         <div class="flex justify-between text-sm text-gray-500 ">
                             <p class="text-sm text-gray-500">Ultimo mes</p>
@@ -319,31 +350,29 @@
                             <p class="text-2xl font-bold text-red-600 mr-2">3</p>
                             <p class="text-sm text-gray-500">Requieren atención</p>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Total usuarios: 7</p>
+                        <p class="text-sm text-gray-500 mt-1">Total usuarios: 3</p>
                     </div>
                 </div>
-
-
 
                 <!-- Charts and Tenants Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     <!-- Consumption Chart -->
                     <div class="card bg-white p-6 rounded-lg shadow lg:col-span-2">
                         <h3 class="text-lg font-semibold text-gray-700 mb-4">Consumo Histórico</h3>
-                        <p class="text-sm text-gray-500 mb-4">Mostrando el consumo de agua y el montoen el último año.
+                        <p class="text-sm text-gray-500 mb-4">Mostrando el consumo de agua y el monto en el último año.
                         </p>
-                        <div class="flex mb-4">
-                            <div class="mr-6">
+                        <div class="flex mb-4 flex-wrap">
+                            <div class="mr-6 mb-2">
                                 <p class="text-sm text-gray-500">Litros</p>
                                 <p class="text-xl font-bold">3.004</p>
                             </div>
-                            <div class="mr-6">
+                            <div class="mr-6 mb-2">
                                 <p class="text-sm text-gray-500">Monto</p>
                                 <p class="text-xl font-bold">2.950 Bs</p>
                             </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Usuarios</p>
-                                <p class="text-sm text-red-500">Hay 3 sin haber pagado el mes anterior.</p>
+                            <div class="mb-2">
+                                <p class="text-sm text-gray-500">Usuario</p>
+                                <p class="text-sm text-red-500">Juan Acosta</p>
                             </div>
                         </div>
 
@@ -410,97 +439,71 @@
                         </div>
                     </div>
                 </div>
-
-
-
-                <!-- Tenants Table -->
-
             </main>
         </div>
     </div>
 
     <script>
-        // Consumption Chart
-        const ctx = document.getElementById('consumptionChart').getContext('2d');
-        const consumptionChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr'],
-                datasets: [
-                    {
-                        label: 'Consumo de agua (L)',
-                        data: [300, 350, 400, 450, 420, 380, 350, 320, 300, 310, 330, 350],
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Monto pagado (Bs)',
-                        data: [250, 300, 350, 400, 380, 350, 320, 300, 280, 290, 310, 330],
-                        borderColor: '#22d3ee',
-                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function (value) {
-                                return value;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
         // Toggle sidebar
         const toggleSidebar = document.getElementById('toggleSidebar');
-        const sidebar = document.querySelector('.sidebar');
+        const sidebar = document.getElementById('sidebar');
         const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
 
+        // Función para alternar el sidebar en desktop
         toggleSidebar.addEventListener('click', () => {
             sidebar.classList.toggle('sidebar-collapsed');
             toggleSidebar.classList.toggle('collapsed');
         });
 
-        mobileMenuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth < 768 && !sidebar.contains(e.target) && e.target !== mobileMenuButton) {
-                sidebar.classList.add('hidden');
+        // Función para alternar el sidebar en móvil
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('active');
+            
+            // Bloquear scroll del body cuando el menú está abierto
+            if(sidebar.classList.contains('mobile-open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
             }
         });
 
-        // Ocultar sidebar automáticamente después de 5 segundos
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebar = document.querySelector('.sidebar');
+        // Cerrar sidebar al hacer clic en el overlay
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
 
-            setTimeout(() => {
-                sidebar.classList.add('sidebar-collapsed');
-            }, 1000); // 5 segundos
+        // Cerrar sidebar al hacer clic fuera en móvil
+        mainContent.addEventListener('click', () => {
+            if(window.innerWidth < 768 && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Asegurarse de que el menú se cierra al cambiar el tamaño de la pantalla
+        window.addEventListener('resize', () => {
+            if(window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Ocultar sidebar automáticamente después de 1 segundo (solo en desktop)
+        document.addEventListener('DOMContentLoaded', function () {
+            if(window.innerWidth >= 768) {
+                setTimeout(() => {
+                    sidebar.classList.add('sidebar-collapsed');
+                }, 1000);
+            }
         });
     </script>
 </body>
-
 </html>

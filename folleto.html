@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroSense - Dashboard</title>
+    <title>HydroSense - Facturación</title>
+    <link rel="icon" type="image/svg+xml" href="../Public/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,109 +31,401 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
-        
+
         .sidebar {
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
             width: 250px;
+            z-index: 40;
         }
-        
+
         .sidebar-collapsed {
             width: 70px;
             overflow: hidden;
         }
-        
+
         .sidebar-collapsed .sidebar-text {
             display: none;
         }
-        
+
         .sidebar-collapsed .logo-text {
             display: none;
         }
-        
+
         .sidebar-collapsed .building-info {
             display: none;
         }
-        
+
         .card {
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .table-row:hover {
             background-color: #f8fafc;
         }
-        
+
         .toggle-btn {
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
         }
-        
+
         .toggle-btn.collapsed {
             transform: rotate(180deg);
         }
-        
+
         /* Estilos para el hover del sidebar */
         .sidebar-collapsed:hover {
             width: 250px;
             z-index: 50;
         }
-        
+
         .sidebar-collapsed:hover .sidebar-text {
             display: inline;
         }
-        
+
         .sidebar-collapsed:hover .logo-text {
             display: inline;
         }
-        
+
         .sidebar-collapsed:hover .building-info {
             display: block;
         }
+
+        /* Estilos para móvil */
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                height: 100vh;
+                top: 0;
+                z-index: 50;
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.5s ease;
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            /* Ajustes para tabla en móvil */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Ocultar columnas menos importantes en móvil */
+            .hidden-mobile {
+                display: none;
+            }
+
+            /* Ajustes para botones en móvil */
+            .btn-mobile {
+                padding: 0.5rem;
+                min-width: auto;
+            }
+
+            .btn-mobile span {
+                display: none;
+            }
+
+            .btn-mobile i {
+                margin-right: 0;
+            }
+        }
+
+        /* Estilos para los modales */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Estilos para los formularios */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #0ea5e9;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0284c7;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Estilos específicos para facturación */
+        .invoice-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-paid {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-overdue {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .invoice-details {
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .invoice-items {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .invoice-items th {
+            background-color: #f3f4f6;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .invoice-items td {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .invoice-total {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+
+        /* Filtros */
+        .filter-section {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Pestañas */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .tab.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50">
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="sidebar bg-hydro-dark text-white p-4 hidden md:flex flex-col sidebar-collapsed">
+        <div class="sidebar bg-hydro-dark/90 text-white p-4 flex flex-col sidebar-collapsed" id="sidebar">
             <div class="flex items-center justify-between mb-8">
-                <a href="/index.html">
-                    
+                <a href="../index.html">
                     <div class="flex items-center">
-                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
+                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
                         </svg>
                         <span class="ml-2 text-xl font-bold logo-text">HydroSense</span>
                     </div>
                 </a>
-                <button id="toggleSidebar" class="toggle-btn text-gray-300 hover:text-white">
+                <button id="toggleSidebar" class="toggle-btn text-gray-300 hover:text-white hidden">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
-            
+
             <nav class="flex-1">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" class="flex items-center p-3 rounded-lg bg-hydro-primary">
-                            <i class="fas fa-tachometer-alt mr-3"></i>
-                            <span class="sidebar-text">Dashboard</span>
+                        <a href="../Dashboar/monitoreo.html"
+                            class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                            <i class="fas fa-chart-bar mr-3"></i>
+                            <span class="sidebar-text">Panel de Monitoreo</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                        <a href="../Dashboar/usuarios.html"
+                            class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
                             <i class="fas fa-users mr-3"></i>
-                            <span class="sidebar-text">Inquilinos</span>
+                            <span class="sidebar-text">Usuarios</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                        <a href="../Dashboar/facturacion.html"
+                            class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30 bg-hydro-primary">
                             <i class="fas fa-file-invoice-dollar mr-3"></i>
                             <span class="sidebar-text">Facturación</span>
                         </a>
@@ -144,41 +438,37 @@
                     </li>
                 </ul>
             </nav>
-            
+
             <div class="mt-auto pt-4 border-t border-hydro-primary/30">
-                <div class="p-3 text-sm building-info">
-                    <p class="font-medium">Torre 1</p>
-                    <p class="text-hydro-light/70">Edificio Principal</p>
-                </div>
-                <a href="/index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
+                <a href="../index.html" class="flex items-center p-3 rounded-lg hover:bg-hydro-primary/30">
                     <i class="fas fa-sign-out-alt mr-3"></i>
-                    <span class="sidebar-text">Logout</span>
+                    <span class="sidebar-text">Salir</span>
                 </a>
             </div>
         </div>
-        
+
         <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
+        <div class="flex-1 overflow-auto" id="mainContent">
             <!-- Header -->
             <header class="bg-white shadow p-4">
                 <div class="flex justify-between items-center">
-                    <div class="flex items-center md:hidden">
-                        <button id="mobileMenuButton" class="mr-4 text-gray-500">
+                    <div class="flex items-center">
+                        <button id="mobileMenuButton" class="mr-4 text-gray-500 md:hidden">
                             <i class="fas fa-bars"></i>
                         </button>
-                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
+                        <svg class="w-8 h-8 text-hydro-primary" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 2C12 2 7 8 7 13a5 5 0 1010 0c0-5-5-11-5-11z"></path>
                         </svg>
+                        <h2 class="ml-2 text-xl font-semibold text-gray-800">Facturación</h2>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
                     <div class="flex items-center">
-                        <div class="relative">
-                            <input type="text" placeholder="Buscar..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
+                        <div class="relative hidden md:block">
+                            <input type="text" placeholder="Buscar factura..."
+                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-                        <button class="ml-4 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
-                            <i class="fas fa-bell"></i>
-                        </button>
                         <div class="ml-4 flex items-center">
                             <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center">
                                 <span class="text-hydro-primary font-bold">AD</span>
@@ -187,216 +477,170 @@
                         </div>
                     </div>
                 </div>
+                <!-- Barra de búsqueda para móvil -->
+                <div class="mt-3 md:hidden">
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar factura..."
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-hydro-primary">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
             </header>
-            
+
             <!-- Main Dashboard -->
-            <main class="p-6">
-                <!-- Cards Section -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <!-- Card 1: Promedio Diario -->
-                    <div class="card bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Promedio Diario</h3>
-                        <p class="text-2xl font-bold text-hydro-primary">418 L</p>
-                        <p class="text-sm text-gray-500">8.3% menos que ayer</p>
+            <main class="p-4 md:p-6">
+                <!-- Filtros -->
+                <div class="filter-section mb-6">
+                    <div class="tab-container mb-4">
+                        <div class="tab active" data-tab="all">Todas</div>
+                        <div class="tab" data-tab="paid">Pagadas</div>
+                        <div class="tab" data-tab="pending">Pendientes</div>
+                        <div class="tab" data-tab="overdue">Vencidas</div>
                     </div>
-                    
-                    <!-- Card 2: Consumo Total -->
-                    <div class="card bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Consumo Total</h3>
-                        <p class="text-2xl font-bold text-hydro-accent">12,540 L</p>
-                        <p class="text-sm text-gray-500">12.5% más que el mes pasado</p>
-                    </div>
-                    
-                    <!-- Card 3: Pago Total -->
-                    <div class="card bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Pago Total</h3>
-                        <p class="text-2xl font-bold text-hydro-dark">3,250 Bs</p>
-                        <p class="text-sm text-gray-500">15.2% de aumento</p>
-                    </div>
-                    
-                    <!-- Card 4: Alertas Activas -->
-                    <div class="card bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Alertas Activas</h3>
-                        <div class="flex items-center">
-                            <p class="text-2xl font-bold text-red-600 mr-2">3</p>
-                            <p class="text-sm text-gray-500">Requieren atención</p>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="form-label">Desde</label>
+                            <input type="date" class="form-input">
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Total inquilinos: 7</p>
-                    </div>
-                </div>
-                
-                <!-- Charts and Tenants Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <!-- Consumption Chart -->
-                    <div class="card bg-white p-6 rounded-lg shadow lg:col-span-2">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Consumo Histórico</h3>
-                        <p class="text-sm text-gray-500 mb-4">Mostrando el consumo de agua y el monto pagado por los inquilinos en el último año.</p>
-                        <div class="flex mb-4">
-                            <div class="mr-6">
-                                <p class="text-sm text-gray-500">Litros</p>
-                                <p class="text-xl font-bold">3.004</p>
-                            </div>
-                            <div class="mr-6">
-                                <p class="text-sm text-gray-500">Monto</p>
-                                <p class="text-xl font-bold">2.950 Bs</p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Inquilinos</p>
-                                <p class="text-sm text-red-500">Hay 3 sin haber pagado el mes anterior.</p>
-                            </div>
+                        <div>
+                            <label class="form-label">Hasta</label>
+                            <input type="date" class="form-input">
                         </div>
-                        <canvas id="consumptionChart" height="190"></canvas>
-                    </div>
-                    
-                    <!-- Tenants Status -->
-                    <div class="card bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Inquilinos con Deuda</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-red-600 font-bold">JP</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium">Juan Pérez</p>
-                                    <p class="text-sm text-gray-500">Dpto 101 - 25 Bs</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-red-600 font-bold">ML</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium">María López</p>
-                                    <p class="text-sm text-gray-500">Dpto 102 - 100 Bs</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center p-3 bg-red-50 rounded-lg">
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-red-600 font-bold">RG</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium">Roberto Gómez</p>
-                                    <p class="text-sm text-gray-500">Dpto 103 - 50 Bs</p>
-                                </div>
-                            </div>
+                        <div>
+                            <label class="form-label">Apartamento</label>
+                            <select class="form-input">
+                                <option value="">Todos</option>
+                                <option value="101">Apto 101</option>
+                                <option value="102">Apto 102</option>
+                                <option value="103">Apto 103</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="btn btn-primary w-full">
+                                <i class="fas fa-filter mr-2"></i> Filtrar
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Tenants Table -->
+
+                <!-- Facturas Table -->
                 <div class="card bg-white rounded-lg shadow overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-700">Detalle de Inquilinos</h3>
-                            <div class="flex">
-                                <button class="px-4 py-2 bg-hydro-primary text-white rounded-lg hover:bg-hydro-dark flex items-center">
-                                    <i class="fas fa-plus mr-2"></i> <span class="hidden sm:inline">Nuevo Inquilino</span>
+                    <div class="p-4 md:p-6">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-4">
+                            <h3 class="text-lg font-semibold text-gray-700">Historial de Facturas</h3>
+                            <div class="flex gap-2">
+                                <button
+                                    class="btn-mobile px-3 py-2 md:px-4 md:py-2 bg-hydro-primary text-white rounded-lg hover:bg-hydro-dark flex items-center">
+                                    <i class="fas fa-file-invoice md:mr-2"></i> <span class="hidden sm:inline">Generar
+                                        Facturas</span>
                                 </button>
-                                <button class="ml-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center">
-                                    <i class="fas fa-download mr-2"></i> <span class="hidden sm:inline">Exportar</span>
+                                <button
+                                    class="btn-mobile px-3 py-2 md:px-4 md:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center">
+                                    <i class="fas fa-download md:mr-2"></i> <span
+                                        class="hidden sm:inline">Exportar</span>
                                 </button>
                             </div>
                         </div>
-                        
-                        <div class="overflow-x-auto">
+                        <div class="table-responsive">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inquilino</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumo (L)</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto (Bs)</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Factura</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Apartamento</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Fecha</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden-mobile">
+                                            Vencimiento</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Estado</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden-mobile">
+                                            Total</th>
+                                        <th
+                                            class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <tr class="table-row">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center mr-3">
-                                                    <span class="text-hydro-primary font-bold">JP</span>
-                                                </div>
-                                                <div>
-                                                    <p class="font-medium">Juan Pérez</p>
-                                                </div>
-                                            </div>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap font-medium">FAC-2023-001</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">Apto 101</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">15/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">30/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <span class="invoice-status status-paid">Pagada</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Dpto 101</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">3,004</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">25 Bs</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Deuda</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
-                                                <i class="fas fa-edit"></i>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">$12,768 COP</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3 view-invoice"
+                                                data-invoice="1">
+                                                <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="text-red-600 hover:text-red-800">
-                                                <i class="fas fa-trash-alt"></i>
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            <button class="text-hydro-primary hover:text-hydro-dark">
+                                                <i class="fas fa-download"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <tr class="table-row">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center mr-3">
-                                                    <span class="text-hydro-primary font-bold">ML</span>
-                                                </div>
-                                                <div>
-                                                    <p class="font-medium">María López</p>
-                                                </div>
-                                            </div>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap font-medium">FAC-2023-002</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">Apto 102</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">15/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">30/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <span class="invoice-status status-pending">Pendiente</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Dpto 102</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">2,950</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">100 Bs</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Deuda</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
-                                                <i class="fas fa-edit"></i>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">$10,700 COP</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3 view-invoice"
+                                                data-invoice="2">
+                                                <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="text-red-600 hover:text-red-800">
-                                                <i class="fas fa-trash-alt"></i>
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            <button class="text-hydro-primary hover:text-hydro-dark">
+                                                <i class="fas fa-download"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <tr class="table-row">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="w-8 h-8 bg-hydro-light rounded-full flex items-center justify-center mr-3">
-                                                    <span class="text-hydro-primary font-bold">RG</span>
-                                                </div>
-                                                <div>
-                                                    <p class="font-medium">Roberto Gómez</p>
-                                                </div>
-                                            </div>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap font-medium">FAC-2023-003</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">Apto 103</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">15/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">30/10/2023</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <span class="invoice-status status-overdue">Vencida</span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Dpto 103</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">2,800</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">50 Bs</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Deuda</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
-                                                <i class="fas fa-edit"></i>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap hidden-mobile">$8,210 COP</td>
+                                        <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3 view-invoice"
+                                                data-invoice="3">
+                                                <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="text-red-600 hover:text-red-800">
-                                                <i class="fas fa-trash-alt"></i>
+                                            <button class="text-hydro-primary hover:text-hydro-dark mr-3">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            <button class="text-hydro-primary hover:text-hydro-dark">
+                                                <i class="fas fa-download"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Pagination -->
-                        <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                        <div class="px-4 md:px-6 py-4 flex items-center justify-between border-t border-gray-200">
                             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                 <div>
                                     <p class="text-sm text-gray-700">
@@ -405,26 +649,32 @@
                                         a
                                         <span class="font-medium">3</span>
                                         de
-                                        <span class="font-medium">7</span>
+                                        <span class="font-medium">3</span>
                                         resultados
                                     </p>
                                 </div>
                                 <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                        aria-label="Pagination">
+                                        <a href="#"
+                                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                             <span class="sr-only">Anterior</span>
                                             <i class="fas fa-chevron-left"></i>
                                         </a>
-                                        <a href="#" aria-current="page" class="z-10 bg-hydro-primary/10 border-hydro-primary text-hydro-dark relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        <a href="#" aria-current="page"
+                                            class="z-10 bg-hydro-primary/10 border-hydro-primary text-hydro-dark relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                             1
                                         </a>
-                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        <a href="#"
+                                            class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                             2
                                         </a>
-                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        <a href="#"
+                                            class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                             3
                                         </a>
-                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <a href="#"
+                                            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                             <span class="sr-only">Siguiente</span>
                                             <i class="fas fa-chevron-right"></i>
                                         </a>
@@ -438,87 +688,214 @@
         </div>
     </div>
 
-    <script>
-        // Consumption Chart
-        const ctx = document.getElementById('consumptionChart').getContext('2d');
-        const consumptionChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar', 'Abr'],
-                datasets: [
-                    {
-                        label: 'Consumo de agua (L)',
-                        data: [300, 350, 400, 450, 420, 380, 350, 320, 300, 310, 330, 350],
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Monto pagado (Bs)',
-                        data: [250, 300, 350, 400, 380, 350, 320, 300, 280, 290, 310, 330],
-                        borderColor: '#22d3ee',
-                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
-                        tension: 0.3,
-                        fill: true,
-                        borderWidth: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+    <!-- Modal para ver factura -->
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalle de Factura <span id="invoiceNumber"></span></h3>
+                <button class="modal-close" id="closeInvoiceModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="invoice-details mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Apartamento</p>
+                            <p class="font-medium" id="invoiceApartment">Apto 101</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Fecha de Emisión</p>
+                            <p class="font-medium" id="invoiceDate">15/10/2023</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Fecha de Vencimiento</p>
+                            <p class="font-medium" id="invoiceDueDate">30/10/2023</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Estado</p>
+                            <p class="font-medium"><span id="invoiceStatus"
+                                    class="invoice-status status-paid">Pagada</span></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Período Facturado</p>
+                            <p class="font-medium" id="invoicePeriod">01/10/2023 - 31/10/2023</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total</p>
+                            <p class="font-medium text-lg" id="invoiceTotal">$12,768 COP</p>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium mb-2">Consumo de Agua</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-hydro-background p-4 rounded-lg">
+                            <p class="text-gray-500 text-sm">Consumo Anterior</p>
+                            <p class="font-medium text-hydro-dark" id="previousConsumption">2,500 L</p>
+                        </div>
+                        <div class="bg-hydro-background p-4 rounded-lg">
+                            <p class="text-gray-500 text-sm">Consumo Actual</p>
+                            <p class="font-medium text-hydro-dark" id="currentConsumption">3,004 L</p>
+                        </div>
+                        <div class="bg-hydro-background p-4 rounded-lg">
+                            <p class="text-gray-500 text-sm">Consumo Total</p>
+                            <p class="font-medium text-hydro-dark" id="totalConsumption">504 L</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium mb-2">Detalle de Conceptos</h4>
+                    <div class="invoice-items">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Consumo de agua</td>
+                                    <td>504 L</td>
+                                    <td>$25.33 / L</td>
+                                    <td>$12,768</td>
+                                </tr>
+                                <tr>
+                                    <td>Cargo fijo</td>
+                                    <td>1</td>
+                                    <td>$5,000</td>
+                                    <td>$5,000</td>
+                                </tr>
+                                <tr class="invoice-total">
+                                    <td colspan="3" class="text-right">Total a pagar</td>
+                                    <td>$17,768 COP</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-medium mb-2">Información de Pago</h4>
+                    <div class="bg-hydro-background p-4 rounded-lg">
+                        <p class="mb-2"><strong>Banco:</strong> Banco de Bogotá</p>
+                        <p class="mb-2"><strong>Cuenta:</strong> 123-456-789</p>
+                        <p class="mb-2"><strong>Titular:</strong> HydroSense SAS</p>
+                        <p class="mb-2"><strong>Referencia:</strong> FAC-2023-001</p>
+                        <p class="text-sm text-gray-500 mt-2">Por favor incluya el número de factura como referencia al
+                            realizar el pago.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="printInvoice">
+                    <i class="fas fa-print mr-2"></i> Imprimir
+                </button>
+                <button class="btn btn-primary" id="downloadInvoice">
+                    <i class="fas fa-download mr-2"></i> Descargar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para generar facturas -->
+    <div class="modal" id="generateInvoicesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Generar Facturas</h3>
+                <button class="modal-close" id="closeGenerateModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group mb-4">
+                    <label class="form-label">Período a facturar</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="date" class="form-input" placeholder="Fecha inicio">
+                        <input type="date" class="form-input" placeholder="Fecha fin">
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label">Fecha de vencimiento</label>
+                    <input type="date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tarifa por litro (COP)</label>
+                    <input type="number" class="form-input" value="25.33">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelGenerate">Cancelar</button>
+                <button class="btn btn-primary" id="confirmGenerate">Generar Facturas</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // Toggle sidebar
         const toggleSidebar = document.getElementById('toggleSidebar');
-        const sidebar = document.querySelector('.sidebar');
+        const sidebar = document.getElementById('sidebar');
         const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
 
-        toggleSidebar.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-collapsed');
-            toggleSidebar.classList.toggle('collapsed');
-        });
+        // Función para alternar el sidebar en desktop
+        if (toggleSidebar) {
+            toggleSidebar.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-collapsed');
+                toggleSidebar.classList.toggle('collapsed');
+            });
+        }
 
-        mobileMenuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-        });
+        // Función para alternar el sidebar en móvil
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+            sidebarOverlay.classList.toggle('active');
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth < 768 && !sidebar.contains(e.target) && e.target !== mobileMenuButton) {
-                sidebar.classList.add('hidden');
+            // Bloquear scroll del body cuando el menú está abierto
+            if (sidebar.classList.contains('mobile-open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
             }
         });
 
-        // Ocultar sidebar automáticamente después de 5 segundos
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.sidebar');
-            
-            setTimeout(() => {
-                sidebar.classList.add('sidebar-collapsed');
-            }, 1000); // 5 segundos
+        // Cerrar sidebar al hacer clic en el overlay
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
         });
+
+        // Cerrar sidebar al hacer clic fuera en móvil
+        mainContent.addEventListener('click', () => {
+            if (window.innerWidth < 768 && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Asegurarse de que el menú se cierra al cambiar el tamaño de la pantalla
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Ocultar sidebar automáticamente después de 1 segundo (solo en desktop)
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.innerWidth >= 768) {
+                setTimeout(() => {
+                    sidebar.classList.add('sidebar-collapsed');
+                }, 1000);
+            }
+        });
+
     </script>
-</body>
-</html>
